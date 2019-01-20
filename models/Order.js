@@ -8,7 +8,7 @@ const orderSchema = new Schema({
     purchaseAmount:  { type: Number},
     recipientAddress: {type: String},
     uniqueBarcode: {type: String},
-    orderStatus: {type: Boolean},
+    orderCompleted: {type: Boolean, default: false},
     secretCode: {type: String}
 }, {
   timestamps: {

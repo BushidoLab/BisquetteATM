@@ -47,21 +47,34 @@ indexRouter.get('/withdraw', function (req, res, next) {
 /* POST withdraw page. */
 indexRouter.post('/withdraw', function (req, res, next) {
 
-  const allOffers = Order.find()
-  .then(() => {
-    let withdawingOffer = allOffers[allOffers.length - 1]
-    let withdrawal = tradePaymentConfirmed(sellerURL, withdawingOffer.marketOrder.id)
-    .then((res, err) => {
-    console.log(withdrawal)
-    })
-  })
-  .catch(err => {
-      console.log(err);
-  })
-  res.render('withdraw.ejs', {
-    title: 'Express'
-  });
+	Order.findOne({
+		secretCode: req.body.codeInput
+	})
+	.then((res)=>{
+		if (res.orderCompleted === false){
+			// res[0].orderCompleted = true;
+			// let withdrawal = tradePaymentConfirmed(sellerURL, res[0].sellOrderId);
+			tradePaymentConfirmed(sellerURL, res.sellOrderId, UpdateOrder());
+			dispenseCash("50")
+		}
+	})
+
+	function UpdateOrder(){
+		Order.findOneAndUpdate({
+			secretCode: req.body.codeInput
+		},{
+			$set: {orderCompleted: true}
+		}, {}, (err, doc) => {
+			console.log("ERROR:", err);
+		})
+	}
+
+	res.render('withdraw.ejs', {
+		title: 'Express'
+	});
 });
+
+
 
 /* GET sell page. */
 indexRouter.get('/sell', function (req, res, next) {
@@ -185,8 +198,8 @@ async function createBuyOrder(url, amount, offerId, cb) {
 
 async function tradePaymentConfirmed(url, offerId) {
   try {
-      let result = axios.post(`${url}/trades/${offerId}/payment-received`);
-      console.log(result);
+      let result = await axios.post(`${url}/trades/${offerId}/payment-received`);
+      console.log("dabnsfjgjahdfbghjbsdrfhjkgbhlajdsfbghadsf", result);
   } catch(err) {
       console.log("ERROR: ", err);
   } 
@@ -295,5 +308,10 @@ indexRouter.post('/sell', function (req, res, next) {
 	// console.log(marketOrder.data.id)
 });
 
+function dispenseCash(amount){
+	console.log("==================")
+	console.log("Here's the cash", amount)
+	console.log("==================")
+}
 
 module.exports = indexRouter;
