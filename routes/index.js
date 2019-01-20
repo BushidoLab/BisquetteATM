@@ -66,12 +66,16 @@ indexRouter.post('/withdraw', function (req, res, next) {
 			$set: {orderCompleted: true}
 		}, {}, (err, doc) => {
 			console.log("ERROR:", err);
+			if(err)
+			res.render('withdraw.ejs', {
+				title: 'Express', error: err
+			});
+			res.render('withdraw.ejs', {
+				title: 'Express', res : doc
+			});
 		})
 	}
-
-	res.render('withdraw.ejs', {
-		title: 'Express'
-	});
+	
 });
 
 

@@ -1,78 +1,159 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<head>
+  <title>
+    <%= title %>
+  </title>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="/stylesheets/login.css" />
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />
+  <script src="sweetalert2/dist/sweetalert2.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>
 
-    <link rel='stylesheet' href='/stylesheets/login.css' />
-    <script src="sweetalert2/dist/sweetalert2.all.min.js"></script>
+  <!-- Include a polyfill for ES6 Promises (optional) for IE11 and UC Browser support -->
+  <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.js"></script>
+  <style>
+    .loader {
+					border: 16px solid #f3f3f3; border-radius: 50%;
+					border-top: 16px solid #3498db;
+					width: 120px;
+					height: 120px;
+					-webkit-animation: spin 2s linear infinite; /* Safari */
+					animation: spin 2s linear infinite;
+				}
+				
+				/* Safari */
+				@-webkit-keyframes spin {
+					0% { -webkit-transform: rotate(0deg); }
+					100% { -webkit-transform: rotate(360deg); }
+				}
+				
+				@keyframes spin {
+					0% { transform: rotate(0deg); }
+					100% { transform: rotate(360deg); }
+				}
+	</style>
+</head>
 
-    <!-- Include a polyfill for ES6 Promises (optional) for IE11 and UC Browser support -->
-    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.js"></script>
-    
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Bisquettes</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/buy">Buy <span class="sr-only">(current)</span></a>
+        </li>
+        <a class="nav-link" href="/withdraw">Withdraw</a>
+      </ul>
+    </div>
+  </nav>
 
+  <form class="form-signin text-center">
 
-  </head>
-  <body>
+    <div class="card p-4" id="secret_code_form">
+      <div class="card-title p-4">
+        <h1 class="h3 mb-3 font-weight-normal">
+          Withdraw your Bitcoin here!
+        </h1>
+      </div>
+      <input name="codeInput" id="codeInput" class="form-control" placeholder="Paste Secret Code" required autofocus>
+      <button class="mt-4 btn btn-lg btn-primary btn-block" id="btn_secret" type="submit">Submit</button>
+    </div>
+    <div class="card p-4" style="display:none" id="take_cash">
+        <div class="card-title p-4">
+          <h1 class="h3 mb-3 font-weight-normal">Please take your CASH:</h1>
+        </div>
+        <p class="h3 mb-3 font-weight-normal"><b><span id="withdraw_amount">USD:</span></b></p>
+        <img src="../img/atm.png" class="img-fluid" alt="Responsive image" />
+        <button class="mt-4 btn btn-lg btn-primary btn-block" id="btn_insert_cash" type="submit">
+          Thank you
+        </button>
+      </div>
+  </form>
 
-      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-          <a class="navbar-brand" href="#">Bisquettes</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+  <div class="modal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Thank you for using Bisquettes!</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+          <div class="loader"></div>
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- method="POST" action="/buy" -->
+
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+  crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+  crossorigin="anonymous"></script>
+<script>
+  function updateAmount() {
+    let amount = $("#purchaseAmount").val();
+    let dollarAmount = (amount * 3692.0).toFixed(2);
+    dollarAmount = Number(dollarAmount).toLocaleString("en");
+    console.log(amount);
+    $("#usd_amount").text(dollarAmount + "$");
+  }
+
+  function validaSecretCode(secret, cb){
+    axios.post('/withdraw', {
+      secretCode: secret
+    })
+      .then(function (response) {
+        console.log(response);
+        if(response.error)
+          return cb(response.error)
+        return cb(null, response.res)
+
+      })
+      .catch(function (error) {
+        console.log(error);
+        return cb(error);
+      });
+    // return cb(null, "55")
+    }
+
+  $(window).on("load", function () {
+    // code here
+    $("#btn_secret").click(function (e) {
+      e.preventDefault();
+      let secret_code = $("#codeInput").text()
+      validaSecretCode(secret_code, function(err, res){
+        if(err){
+          alert("An error has occured:\n", err)
+        } else {
+        $("#secret_code_form").hide();
+        $("#take_cash").show();
+        $("#withdraw_amount").text("USD: " + res + "$");
         
-          <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item">
-                <a class="nav-link" href="/buy">Buy</a>
-              </li>
-              <!-- <li class="nav-item">
-                <a class="nav-link" href="/sell">Sell</a>
-              </li> -->
-              <li class="nav-item active">
-                  <a class="nav-link" href="/withdraw">Withdraw <span class="sr-only">(current)</span></a>
-              </li>
-              <!-- <li class="nav-item">
-                <a class="nav-link disabled" href="#">Disabled</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown01">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </li> -->
-            </ul>
-          </div>
-        </nav>
-        
-
-
-
-
-
-
-
-		<form class="form-signin text-center" method="POST"  action="/withdraw">
-			<div class='card p-4' id="withdraw_form">
-				<h1 class="h3 mb-3 font-weight-normal">
-					Withdraw your Bitcoin here!
-				</h1>
-				<label for="codeInput" class="sr-only">What's your code?</label>
-				<input name="codeInput" id="codeInput" class="form-control" placeholder="Code" required autofocus>
-				<button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
-			</div>
-      <img class="mb-4" src="/docs/4.2/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
-    </form>
-    
-  </body>
-
-  
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+      }
+       })
+    });
+  });
+</script>
 
 </html>
