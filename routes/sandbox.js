@@ -5,8 +5,8 @@ var http = require("http");
 
 // TEMPORARY GLOBAL VARIABLES
 const axios = require("axios");
-const buyerURL = "http://6dffe9a5.ngrok.io/api/v1";
-const sellerURL = "http://28a089be.ngrok.io/api/v1";
+const buyerURL = "http://c33a1f61.ngrok.io/api/v1";
+const sellerURL = "http://b7872068.ngrok.io/api/v1";
 const buyerId = "52521b91-9ca5-4013-a4ad-5b04d4bf54e8";
 const sellerId = "9ab0fddd-fa1d-4105-bf9f-1f3a80a359ec";
 const offerId = "49e2d00e-d9d9-42c3-b913-07bebc1d864a";
@@ -26,7 +26,7 @@ async function retrieveAddresses(url) {
         let addresses = result.map(address => {
             console.log(address)
         })
-        return addresses;
+        return addresses.;
     } catch(err){
         console.log(err)
     }
