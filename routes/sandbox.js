@@ -5,8 +5,8 @@ var http = require("http");
 
 // TEMPORARY GLOBAL VARIABLES
 const axios = require("axios");
-const buyerURL = "http://6dffe9a5.ngrok.io/api/v1";
-const sellerURL = "http://28a089be.ngrok.io/api/v1";
+const buyerURL = "http://c33a1f61.ngrok.io/api/v1";
+const sellerURL = "http://b7872068.ngrok.io/api/v1";
 const buyerId = "52521b91-9ca5-4013-a4ad-5b04d4bf54e8";
 const sellerId = "9ab0fddd-fa1d-4105-bf9f-1f3a80a359ec";
 const offerId = "49e2d00e-d9d9-42c3-b913-07bebc1d864a";
@@ -24,9 +24,22 @@ async function retrieveAddresses(url) {
         result = result.data.walletAddresses;
 
         let addresses = result.map(address => {
-            console.log(address)
+            if (address.context == "TRADE_PAYOUT" && address.balance > 0 ){
+                // console.log(address)
+                return address.offerId
+            }
+        
+            // console.log(address)
         })
-        return addresses;
+
+        // FIND CORRESPONDING OFFERID IN MONGODB
+        // let orders = Order.find({}, (res, err) => {
+        //     console.log("Here's the order list", res)
+        //     console.log("Here's the order list ERROR", err)
+        // });
+
+        // console.log("Here are all of the orders", orders)
+        // return addresses;
     } catch(err){
         console.log(err)
     }
@@ -49,6 +62,21 @@ async function retrieveAddresses(url) {
     //     console.log(err)
     // }
 }
+
+function showAllOrders(){
+    // FIND CORRESPONDING OFFERID IN MONGODB
+    Order.findOne({
+        "sellOrderId": "QHiPQ-d7e2a1a9-fc4b-448e-862d-436dcb282fd2-093"
+    })
+    .then((res) => {
+        console.log("NICKKKK", res)
+    })
+    // console.log(orders)
+}
+
+
+
+
 
 async function retrieveOrder(sellOrderId) {
     try{
@@ -89,13 +117,39 @@ async function withdrawFunds(URL, targetAddress, sourceAddresses, amount) {
     }
 }
 
-const masterTargetAddress = "2N5dgXbVwUoFZkbceyRun99UaErvbMY6cXV"
+async function sendToAddress(address,amount){
+  
+	var options = {
+      "method": "POST",
+      "port": "18443",
+      "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic d2VmZ2l3ZWJmZzIzYnI6ZWZ3aW91bjIzb3VyYg==",
+          "cache-control": "no-cache",
+          "Postman-Token": "363b3275-ca2a-4e96-9336-d8d4db9f4397"
+      }
+  };
+  
+  var req = http.request(options, function (res) {
+      var chunks = [];
+  
+      res.on("data", function (chunk) {
+          chunks.push(chunk);
+      });
+  
+      res.on("end", function () {
+          var body = Buffer.concat(chunks);
+          console.log(body.toString());
+      });
+  });
+  
+  req.write(JSON.stringify({
+      method: 'sendtoaddress',
+      params: [address, amount]
+  }));
+  req.end();
+}
 
-// retrieveAddresses(sellerURL)
-
-withdrawFunds(sellerURL, masterTargetAddress, retrieveAddresses(sellerURL), 10000)
-withdrawFunds(buyerURL, masterTargetAddress, retrieveAddresses(buyerURL), 10000)
 
 
-// withdrawFunds(sellerURL, "mjSKp7AFQVNBxTKnpL9YDFUnbC1dtDtdfc", "2N5dgXbVwUoFZkbceyRun99UaErvbMY6cXV", 300000)
-// withdrawFunds(sellerURL, "mjSKp7AFQVNBxTKnpL9YDFUnbC1dtDtdfc", retrieveAddresses(buyerURL), 10000)
+sendToAddress("2MwXmWYiadyCay2JnUP6r5yoKMAChv2J9fq", .01)

@@ -55,7 +55,7 @@
     </div>
   </nav>
 
-  <form class="form-signin text-center">
+  <form class="form-signin text-center" action="/withdraw" method="POST">
 
     <div class="card p-4" id="secret_code_form">
       <div class="card-title p-4">
@@ -120,7 +120,7 @@
   }
 
   function validaSecretCode(secret, cb){
-    axios.post('/withdraw', {
+    axios.post('http://localhost:8001/withdraw', {
       secretCode: secret
     })
       .then(function (response) {
@@ -129,31 +129,28 @@
           return cb(response.error)
         return cb(null, response.res)
 
-      })
-      .catch(function (error) {
-        console.log(error);
-        return cb(error);
-      });
-    // return cb(null, "55")
-    }
+    <form class="form-signin" method="POST"  action="/withdraw">
+      <img class="mb-4" src="/docs/4.2/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+      <h1 class="h3 mb-3 font-weight-normal">Withdraw your Bitcoin heer</h1>
+      <label for="codeInput" class="sr-only">What's your code?</label>
+      <input name="codeInput" id="codeInput" class="form-control" placeholder="Code" required autofocus>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+      <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
+    </form>
 
-  $(window).on("load", function () {
-    // code here
-    $("#btn_secret").click(function (e) {
-      e.preventDefault();
-      let secret_code = $("#codeInput").text()
-      validaSecretCode(secret_code, function(err, res){
-        if(err){
-          alert("An error has occured:\n", err)
-        } else {
-        $("#secret_code_form").hide();
-        $("#take_cash").show();
-        $("#withdraw_amount").text("USD: " + res + "$");
-        
-      }
-       })
-    });
-  });
-</script>
+    <script type="javascript">
+        QRCode.toCanvas(document.getElementById('canvas'), 'sample text', function (error) {
+          if (error) console.error(error)
+          console.log('success!');
+        })
+    </script>
+    
+  </body>
+
+  <script src="bundle.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 
 </html>
