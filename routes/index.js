@@ -174,9 +174,22 @@ async function createBuyOrder(url, amount, offerId) {
 			paymentAccountId: buyerId,
 			amount: amount
 		}
-        let result = await axios.post(`${url}/offers/${offerId}/take`, body);
-        console.log(result);
-        // generateBlock(1);
+		let result = await axios.post(`${url}/offers/${offerId}/take`, body);
+		console.log("Time1")
+		// console.log(result);
+		
+		// RUN FIRST
+		// wait 10 seconds then mine block
+		setTimeout(async function(){
+			generateBlock(1);
+		}, 10000);
+
+		// RUN SECOND
+		// wait ten seconds and then pa		;
+		setTimeout(async function(){
+			paymentStarted(url, offerId);
+		}, 20000);
+
 	} catch (err) {
 		console.log("ERROR ITS THIS ONE : ", err);
 	}
@@ -184,7 +197,7 @@ async function createBuyOrder(url, amount, offerId) {
 
 async function tradePaymentConfirmed(url, offerId) {
   try {
-      let result = await axios.post(`${url}/trades/${offerId}/payment-received`);
+      let result = axios.post(`${url}/trades/${offerId}/payment-received`);
       console.log(result);
   } catch(err) {
       console.log("ERROR: ", err);
@@ -194,7 +207,8 @@ async function tradePaymentConfirmed(url, offerId) {
 
 
 async function generateBlock(blocksToGenerate){
-  var options = {
+  
+	var options = {
       "method": "POST",
       "port": "18443",
       "headers": {
@@ -220,7 +234,7 @@ async function generateBlock(blocksToGenerate){
   
   req.write(JSON.stringify({
       method: 'generate',
-      params: [blocksToGenerate]
+      params: [1]
   }));
   req.end();
 }
