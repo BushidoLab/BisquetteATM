@@ -34,7 +34,7 @@ indexRouter.get('/', function (req, res, next) {
 
 /* GET withdraw page. */
 indexRouter.get('/withdraw', function (req, res, next) {
-	res.render('withdraw.ejs', {
+	res.render('congrats.ejs', {
 		title: 'Express'
 	});
 });
@@ -79,6 +79,12 @@ indexRouter.post('/withdraw', function (req, res, next) {
 /* GET sell page. */
 indexRouter.get('/sell', function (req, res, next) {
 	res.render('sell.ejs', {
+		title: 'Express'
+	});
+});
+
+indexRouter.get('/congrats', function (req, res, next) {
+	res.render('congrats.ejs', {
 		title: 'Express'
 	});
 });
@@ -146,7 +152,8 @@ async function getAccountId(url) {
 async function matchOffer(url, amount, cb) {
 	try {
 		let response = await axios.get(`${url}/offers`);
-		let offer = response.data.offers[response.data.offers.length - 1];
+		// let offer = response.data.offers[response.data.offers.length - 1];
+		let offer = response.data.offers[0];
 		console.log(offer.id)
 		createBuyOrder(url, amount, offer.id, cb);
 	} catch (err) {
@@ -313,5 +320,53 @@ function dispenseCash(amount){
 	console.log("Here's the cash", amount)
 	console.log("==================")
 }
+
+
+
+async function withdrawFunds(buyerUrl, sellerAddress, buyerAddress, amount) {
+    try {
+        const withdrawFundsFrom = {
+            sourceAddresses: [
+                sellerAddress
+            ],
+            targetAddress: buyerAddress,
+            amount: amount,
+            feeExcluded: true
+        }
+        let result = await axios.post(`${buyerUrl}/wallet/withdraw`, withdrawFundsFrom);
+        console.log(result)
+    } catch(err) {
+        // console.log("ERROR: ", err);
+    }
+}
+
+async function retrieveAddresses(url) {
+    try {
+        let result = await axios.get(`${url}/wallet/addresses`);
+        result = result.data.walletAddresses;
+
+        let addresses = result.map(address => {
+            return address;
+        })
+
+        addresses.forEach(address => {
+            if (address.context === "RESERVED_FOR_TRADE") {
+                withdrawFunds("http://28a089be.ngrok.io/api/v1", address.address, buyerAddress, 1000000)
+                console.log(address.address)
+            }
+        });
+    } catch(err) {
+        console.log("ERROR: ", err);
+    }
+}
+
+
+
+
+
+
+
+
+
 
 module.exports = indexRouter;
