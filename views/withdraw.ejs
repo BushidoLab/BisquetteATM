@@ -143,7 +143,22 @@
           if (error) console.error(error)
           console.log('success!');
         })
+        $(window).on("load", function () {
+    // code here
+      $("#btn_secret").click(function (e) {
+        // e.preventDefault();
+        // let secret_code = $("#codeInput").text()
+        // validaSecretCode(secret_code, function(err, res){
+        //   if(err){
+        //     alert("An error has occured:\n", err)
+        //   } else {
+          $("#secret_code_form").hide();
+          $("#take_cash").show();
+          // $("#withdraw_amount").text("USD: " + res + "$");
+        })
+      })
     </script>
+    
     
   </body>
 
