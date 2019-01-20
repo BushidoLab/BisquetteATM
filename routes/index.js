@@ -27,14 +27,14 @@ const Order = require("../models/order");
 
 /* GET home page. */
 indexRouter.get('/', function (req, res, next) {
-	res.render('index.ejs', {
+	res.render('buy.ejs', {
 		title: 'Express'
 	});
 });
 
 /* GET withdraw page. */
 indexRouter.get('/withdraw', function (req, res, next) {
-	res.render('congrats.ejs', {
+	res.render('withdraw.ejs', {
 		title: 'Express'
 	});
 });
