@@ -81,48 +81,21 @@ indexRouter.get('/buy', function (req, res, next) {
 indexRouter.post('/buy', function (req, res, next) {
 	let purchaseAmount = req.body.purchaseAmount * 100000000;
 	let recipientAddress = req.body.recipientAddress;
-	console.log("Amount:", purchaseAmount);
-	console.log("Address:", recipientAddress);
 
-	let marketOrder = matchOffer(buyerURL, purchaseAmount)
-		.then((res, err) => {
-			const newBuyOrder = new Order({
-				marketOrder: res.data,
-				orderType: "Buy",
-				purchaseAmount: purchaseAmount,
-				recipientAddress: recipientAddress
-			})
-			console.log("HERE ==========", newBuyOrder)
-			newBuyOrder.save();
-		});
+	matchOffer(buyerURL, purchaseAmount, (secretCode, sellOrderId) => {
+		Order.create({
+			marketOrder: res.data,
+			sellOrderId,
+			secretCode,
+			orderType: "Buy",
+			purchaseAmount, 
+			recipientAddress,
+		})
+	})
 
 	res.render('buy', {
 		title: 'Express'
 	});
-});
-
-/* POST sell page. */
-
-indexRouter.post('/sell', function (req, res, next) {
-	let saleAmount = req.body.saleAmount;
-	let marketOrder = createSellOrder(sellerURL, saleAmount)
-		.then((res, err) => {
-			console.log(res.data);
-			const newSellOrder = new Order({
-				marketOrder: res.data,
-				orderType: "Sell",
-				purchaseAmount: saleAmount,
-				// recipientAddress: recipientAddress
-			})
-			newSellOrder.save();
-			if (err) {
-				console.log("Error:", err)
-			}
-		})
-	res.render('index', {
-		title: 'Express'
-	});
-	// console.log(marketOrder.data.id)
 });
 
 async function createSellOrder(sellerURL, saleAmount) {
@@ -157,18 +130,18 @@ async function getAccountId(url) {
 	}
 };
 
-async function matchOffer(url, amount) {
+async function matchOffer(url, amount, cb) {
 	try {
 		let response = await axios.get(`${url}/offers`);
 		let offer = response.data.offers[response.data.offers.length - 1];
 		console.log(offer.id)
-		createBuyOrder(url, amount, offer.id);
+		createBuyOrder(url, amount, offer.id, cb);
 	} catch (err) {
 		console.log("matchOffer() error: ", err);
 	}
 };
 
-async function createBuyOrder(url, amount, offerId) {
+async function createBuyOrder(url, amount, offerId, cb) {
 	try {
 		const body = {
 			paymentAccountId: buyerId,
@@ -184,11 +157,26 @@ async function createBuyOrder(url, amount, offerId) {
 			generateBlock(1);
 		}, 10000);
 
+		
 		// RUN SECOND
 		// wait ten seconds and then pa		;
 		setTimeout(async function(){
 			paymentStarted(url, offerId);
+			let randomCode = generateCode();
+			sendSMS(randomCode, offerId, cb);
+			// let marketOrder = Order.create({
+			// 	sellOrderId: offerId,
+			// 	secretCode: randomCode
+			// });
+			// cb(offerId, randomCode);
+			console.log(marketOrder);
+			// marketOrder.secretCode = randomCode;
+			// marketOrder.save();
 		}, 20000);
+
+		
+
+
 
 	} catch (err) {
 		console.log("ERROR ITS THIS ONE : ", err);
@@ -250,10 +238,62 @@ async function paymentStarted(url, offerId) {
 }
 
 
+// Download the helper library from https://www.twilio.com/docs/node/install
+// Your Account Sid and Auth Token from twilio.com/console
+const accountSid = 'AC37e2bbe3d86eda5fbcd255a107906902';
+const authToken = '2d8a2c63ca8fd59d4dcef25749a0f6e1';
+const client = require('twilio')(accountSid, authToken);
 
 
+indexRouter.post('/text', function (req, res, next) {
+	sendSMS();
+	res.render('index.ejs', {
+		title: 'Express'
+	});
+});
 
+function sendSMS(code, offerId, cb){
+	client.messages
+	.create({
+		body: code,
+		from: '+17542191499',
+		to: '+13057648836'
+	})
+	.then(message => {
+		console.log(message.sid);
+		cb(code, offerId);
+	})
+	.done();
+}
 
+function generateCode(){
+	let code = Math.random().toString().substring(2,6);
+	return code;
+}
+
+/* POST sell page. */
+
+indexRouter.post('/sell', function (req, res, next) {
+	let saleAmount = req.body.saleAmount;
+	createSellOrder(sellerURL, saleAmount)
+		.then((res, err) => {
+			console.log(res.data);
+			const newSellOrder = new Order({
+				marketOrder: res.data,
+				orderType: "Sell",
+				purchaseAmount: saleAmount,
+				// recipientAddress: recipientAddress
+			})
+			newSellOrder.save();
+			if (err) {
+				console.log("Error:", err)
+			}
+		})
+	res.render('index', {
+		title: 'Express'
+	});
+	// console.log(marketOrder.data.id)
+});
 
 
 module.exports = indexRouter;
