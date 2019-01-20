@@ -1,17 +1,28 @@
 var express = require('express');
 var indexRouter = express.Router();
+var http = require("http");
+
 
 // TEMPORARY GLOBAL VARIABLES
 const axios = require("axios");
 const buyerURL = "http://6dffe9a5.ngrok.io/api/v1";
 const sellerURL = "http://28a089be.ngrok.io/api/v1";
-const buyerId = "40a5ea3a-92b2-4868-a052-33d0662fe661";
-const sellerId = "b479d87c-5a0d-4a07-8c0f-d46302ecb954";
+const buyerId = "52521b91-9ca5-4013-a4ad-5b04d4bf54e8";
+const sellerId = "9ab0fddd-fa1d-4105-bf9f-1f3a80a359ec";
 const offerId = "49e2d00e-d9d9-42c3-b913-07bebc1d864a";
 const sourceAddress = "mkihmZv7bbT7hKWV5WjnYhUxdg6xnPK1GD";
 const targetAddress = "2N3w3jPyCqM5q3FC4pgeRSnLFYaWAvgLHdb";
 
 const Order = require("../models/order");
+
+// var market = require("./market.js");
+// var createSellOrder = market.createSellOrder();
+// var createSellOrder = market.createSellOrder();
+// var getAccountId = market.getAccountId();
+// var matchOffer = market.matchOffer();
+// var createBuyOrder = market.createBuyOrder();
+// var tradePaymentConfirmed = market.tradePaymentConfirmed();
+// var paymentStarted = market.paymentStarted();
 
 
 /* GET home page. */
@@ -68,7 +79,7 @@ indexRouter.get('/buy', function (req, res, next) {
 
 /* POST buy page. */
 indexRouter.post('/buy', function (req, res, next) {
-	let purchaseAmount = req.body.purchaseAmount;
+	let purchaseAmount = req.body.purchaseAmount * 100000000;
 	let recipientAddress = req.body.recipientAddress;
 	console.log("Amount:", purchaseAmount);
 	console.log("Address:", recipientAddress);
@@ -164,21 +175,8 @@ async function createBuyOrder(url, amount, offerId) {
 			amount: amount
 		}
         let result = await axios.post(`${url}/offers/${offerId}/take`, body);
-        // Mine block first
-        const payload = {
-            method: "generate",
-            "params":[
-              1
-            ],
-            auth: {
-                username: "wefgiwebfg23br",
-                password: "efwioun23ourb"
-            }
-        };
-        let blockResponse = await axios.post("localhost:18443", payload);
-        console.log("Blockresponse: ",blockResponse);
-		await axios.post(`${url}/trades/${offerId}/payment-started`);
-		return result;
+        console.log(result);
+        // generateBlock(1);
 	} catch (err) {
 		console.log("ERROR ITS THIS ONE : ", err);
 	}
@@ -192,6 +190,56 @@ async function tradePaymentConfirmed(url, offerId) {
       console.log("ERROR: ", err);
   } 
 };
+
+
+
+async function generateBlock(blocksToGenerate){
+  var options = {
+      "method": "POST",
+      "port": "18443",
+      "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Basic d2VmZ2l3ZWJmZzIzYnI6ZWZ3aW91bjIzb3VyYg==",
+          "cache-control": "no-cache",
+          "Postman-Token": "363b3275-ca2a-4e96-9336-d8d4db9f4397"
+      }
+  };
+  
+  var req = http.request(options, function (res) {
+      var chunks = [];
+  
+      res.on("data", function (chunk) {
+          chunks.push(chunk);
+      });
+  
+      res.on("end", function () {
+          var body = Buffer.concat(chunks);
+          console.log(body.toString());
+      });
+  });
+  
+  req.write(JSON.stringify({
+      method: 'generate',
+      params: [blocksToGenerate]
+  }));
+  req.end();
+}
+
+async function paymentStarted(url, offerId) {
+    try {
+        console.log(`${url}/trades/${offerId}/payment-started`);
+        let response = await axios.post(`${url}/trades/${offerId}/payment-started`);
+        console.log("paymentstarted response:", response);
+    } catch(err) {
+        console.log("paymentstarted error: ", err)
+    }
+}
+
+
+
+
+
+
 
 
 module.exports = indexRouter;
