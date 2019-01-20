@@ -16,18 +16,18 @@ const session        = require("express-session");
 var app = express();
 
 // Import any mongodb models
-// const User = require("./models/user");
+const Order = require("./models/order");
 
 // Route configuration
 var indexRouter = require('./routes/index');
 
 // MongoDB setup
-// mongoose.connect(process.env.MONGODB_URI).then(
-//   () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-//   err => {
-//     console.log(err); /** handle initial connection error */
-//   }
-// );
+mongoose.connect(process.env.MONGODB_URI).then(
+  () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
+  err => {
+    console.log(err); /** handle initial connection error */
+  }
+);
 
 // app.engine('html', require('ejs').renderFile);
 app.use(express.static(path.join(__dirname, 'public')));
