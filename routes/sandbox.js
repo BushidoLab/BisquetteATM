@@ -24,9 +24,22 @@ async function retrieveAddresses(url) {
         result = result.data.walletAddresses;
 
         let addresses = result.map(address => {
-            console.log(address)
+            if (address.context == "TRADE_PAYOUT" && address.balance > 0 ){
+                // console.log(address)
+                return address.offerId
+            }
+        
+            // console.log(address)
         })
-        return addresses.;
+
+        // FIND CORRESPONDING OFFERID IN MONGODB
+        // let orders = Order.find({}, (res, err) => {
+        //     console.log("Here's the order list", res)
+        //     console.log("Here's the order list ERROR", err)
+        // });
+
+        // console.log("Here are all of the orders", orders)
+        // return addresses;
     } catch(err){
         console.log(err)
     }
@@ -49,6 +62,21 @@ async function retrieveAddresses(url) {
     //     console.log(err)
     // }
 }
+
+function showAllOrders(){
+    // FIND CORRESPONDING OFFERID IN MONGODB
+    Order.findOne({
+        "sellOrderId": "QHiPQ-d7e2a1a9-fc4b-448e-862d-436dcb282fd2-093"
+    })
+    .then((res) => {
+        console.log("NICKKKK", res)
+    })
+    // console.log(orders)
+}
+
+
+
+
 
 async function retrieveOrder(sellOrderId) {
     try{
@@ -91,10 +119,12 @@ async function withdrawFunds(URL, targetAddress, sourceAddresses, amount) {
 
 const masterTargetAddress = "2N5dgXbVwUoFZkbceyRun99UaErvbMY6cXV"
 
-// retrieveAddresses(sellerURL)
+retrieveAddresses(buyerURL)
 
-withdrawFunds(sellerURL, masterTargetAddress, retrieveAddresses(sellerURL), 10000)
-withdrawFunds(buyerURL, masterTargetAddress, retrieveAddresses(buyerURL), 10000)
+showAllOrders()
+
+// withdrawFunds(sellerURL, masterTargetAddress, retrieveAddresses(sellerURL), 10000)
+// withdrawFunds(buyerURL, masterTargetAddress, retrieveAddresses(buyerURL), 10000)
 
 
 // withdrawFunds(sellerURL, "mjSKp7AFQVNBxTKnpL9YDFUnbC1dtDtdfc", "2N5dgXbVwUoFZkbceyRun99UaErvbMY6cXV", 300000)
